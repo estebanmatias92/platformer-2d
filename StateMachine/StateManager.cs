@@ -8,8 +8,9 @@ namespace Platformer2D.StateMachine
     {
         // Collection of states
         protected Dictionary<EState, BaseState<EState>> States = new Dictionary<EState, BaseState<EState>>();
-        protected BaseState<EState> currentState;
+        public BaseState<EState> currentState { get; protected set; }
 
+        // Flag
         protected bool IsTransitioningState = false;
 
         private void Start()
@@ -53,21 +54,6 @@ namespace Platformer2D.StateMachine
             IsTransitioningState = false;
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            currentState.OnTriggerEnter2D(other);
-        }
 
-        private void OnTriggerStay2D(Collider2D other)
-        {
-            currentState.OnTriggerStay2D(other);
-
-        }
-
-        private void OnTriggerExit2D(Collider2D other)
-        {
-            currentState.OnTriggerExit2D(other);
-
-        }
     }
 }

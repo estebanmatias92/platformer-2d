@@ -1,50 +1,70 @@
 ﻿using Platformer2D.StateMachine;
+using Platformer2D.Utils;
 using UnityEngine;
 
 namespace Platformer2D.Player.PlayerStates
 {
-    // Alias
     internal class JumpingState : BaseState<EPlayerState>
     {
-        public JumpingState() : base(EPlayerState.Jumping)
-        {
+        private Timer jumpBufferTimer; // External tool
+        private bool isPlayerReadyToJump;
+        private bool isPlayerStill;
+        private bool isPlayerAirborne;
 
+        public JumpingState(Timer jumpBufferTimer) : base(EPlayerState.Jumping)
+        {
+            this.jumpBufferTimer = jumpBufferTimer;
         }
 
         public override void EnterState()
         {
-            Debug.Log("Empeze a correr!");
-        }
-
-        public override void ExitState()
-        {
-            Debug.Log("Termine de correr!");
+            jumpBufferTimer.Reset();
+            isPlayerReadyToJump = false;
+            isPlayerStill = false;
+            isPlayerAirborne = true;
         }
 
         public override void UpdateState()
         {
-            // Lógica de actualización para Jumping.
+            Debug.Log("Jumping");
+            jumpBufferTimer.UpdateTimer(); // Keeps track of the Jump Buffer
+
+            if (jumpBufferTimer.IsActive && !isPlayerAirborne)
+            {
+                isPlayerReadyToJump = true;
+            }
+        }
+
+        public override void ExitState()
+        {
+            jumpBufferTimer.Stop();
         }
 
         public override EPlayerState GetNextState()
         {
-            // Determinar el próximo estado.
-            return StateKey; // Permanecer en Jumping por defecto.
+            if (isPlayerReadyToJump) { return EPlayerState.ReadyToJump; }
+            if (!isPlayerStill) { return EPlayerState.Running; }
+            if (isPlayerStill) { return EPlayerState.Idle; }
+
+            return StateKey;
         }
 
-        public override void OnTriggerEnter2D(Collider2D other)
+        public void HandlePlayerWantsToJump(bool isButtonPressed)
         {
-            throw new System.NotImplementedException();
+            if (isButtonPressed)
+            {
+                jumpBufferTimer.Start();
+            }
         }
 
-        public override void OnTriggerStay2D(Collider2D other)
+        public void HandlePlayerAirborne(bool isAirborne)
         {
-            throw new System.NotImplementedException();
+            isPlayerAirborne = isAirborne;
         }
 
-        public override void OnTriggerExit2D(Collider2D other)
+        public void HandlePlayerStill(bool isStill)
         {
-            throw new System.NotImplementedException();
+            isPlayerStill = isStill;
         }
     }
 }

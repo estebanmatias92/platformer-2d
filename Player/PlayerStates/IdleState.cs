@@ -1,50 +1,47 @@
 ﻿using Platformer2D.StateMachine;
-using UnityEngine;
 
 namespace Platformer2D.Player.PlayerStates
 {
     // Alias
     internal class IdleState : BaseState<EPlayerState>
     {
-        public IdleState() : base(EPlayerState.Idle)
-        {
+        // We need flags to know when and which state this has to change
+        private bool isPlayerReadyToJump;
+        private bool isPlayerRunning;
 
-        }
+        public IdleState() : base(EPlayerState.Idle) { }
 
         public override void EnterState()
         {
-            Debug.Log("Empeze a correr!");
-        }
-
-        public override void ExitState()
-        {
-            Debug.Log("Termine de correr!");
+            isPlayerReadyToJump = false;
+            isPlayerRunning = false;
         }
 
         public override void UpdateState()
         {
-            // Lógica de actualización para Running.
+            //Debug.Log("Idle");
         }
+
+        public override void ExitState() { }
 
         public override EPlayerState GetNextState()
         {
-            // Determinar el próximo estado.
-            return StateKey; // Permanecer en Running por defecto.
+            if (isPlayerReadyToJump) { return EPlayerState.ReadyToJump; }
+
+            if (isPlayerRunning) { return EPlayerState.Running; }
+
+            return StateKey; // Keep on Idle state by default.
         }
 
-        public override void OnTriggerEnter2D(Collider2D other)
+        // Catch events from GameObject component
+        public void HandlePlayerWantsToJump(bool isButtonPressed)
         {
-            throw new System.NotImplementedException();
+            isPlayerReadyToJump = isButtonPressed;
         }
 
-        public override void OnTriggerStay2D(Collider2D other)
+        public void HandlePlayerStill(bool isStill)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override void OnTriggerExit2D(Collider2D other)
-        {
-            throw new System.NotImplementedException();
+            isPlayerRunning = !isStill;
         }
     }
 }

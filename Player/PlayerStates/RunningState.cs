@@ -1,50 +1,49 @@
 ﻿using Platformer2D.StateMachine;
-using UnityEngine;
 
 namespace Platformer2D.Player.PlayerStates
 {
     // Alias
     internal class RunningState : BaseState<EPlayerState>
     {
-        public RunningState() : base(EPlayerState.Running)
-        {
+        // We need flags to know when and which state this has to change
+        private bool isPlayerReadyToJump;
+        private bool isPlayerStill;
 
-        }
+        public RunningState() : base(EPlayerState.Running) { }
 
         public override void EnterState()
         {
-            Debug.Log("Empeze a correr!");
-        }
-
-        public override void ExitState()
-        {
-            Debug.Log("Termine de correr!");
+            isPlayerReadyToJump = false;
+            isPlayerStill = true;
         }
 
         public override void UpdateState()
         {
-            // Lógica de actualización para Running.
+            //Debug.Log("Running");
         }
+
+        public override void ExitState() { }
 
         public override EPlayerState GetNextState()
         {
-            // Determinar el próximo estado.
-            return StateKey; // Permanecer en Running por defecto.
+            if (isPlayerReadyToJump) { return EPlayerState.ReadyToJump; }
+
+            if (isPlayerStill) { return EPlayerState.Idle; }
+
+            return StateKey; // Keep on Running state by default.
         }
 
-        public override void OnTriggerEnter2D(Collider2D other)
+        public void HandlePlayerWantsToJump(bool isButtonPressed)
         {
-            throw new System.NotImplementedException();
+            if (isButtonPressed)
+            {
+                isPlayerReadyToJump = true;
+            }
         }
 
-        public override void OnTriggerStay2D(Collider2D other)
+        public void HandlePlayerStill(bool isStill)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override void OnTriggerExit2D(Collider2D other)
-        {
-            throw new System.NotImplementedException();
+            isPlayerStill = isStill;
         }
     }
 }
