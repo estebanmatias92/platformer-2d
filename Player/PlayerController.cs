@@ -5,6 +5,14 @@ using Debug = UnityEngine.Debug;
 
 namespace Platformer2D.Player
 {
+    /// <summary>
+    /// This class handles the logic for the Player.
+    /// 
+    /// Uses other components as input (events about states) 
+    /// and outputs (physics execution).
+    /// 
+    /// And handles the User Input system through event hooks.
+    /// </summary>
     [RequireComponent(typeof(PlayerJump))]
     [RequireComponent(typeof(PlayerMovement))]
     [RequireComponent(typeof(PlayerCollision))]
