@@ -1,18 +1,14 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Platformer2D.Player
 {
     public class PlayerMovement : MonoBehaviour
     {
-        /// Components
+        // GameObject Components
         private Rigidbody2D rb2d;
 
-        // Customizable fields
+        // Editor fields
         [SerializeField] private float moveSpeed = 10f;
-
-        // Properties
-        private float horizontalMovement = 0f;
 
         private void Awake()
         {
@@ -21,21 +17,9 @@ namespace Platformer2D.Player
                 Debug.LogError("Rigidbody2D not found in the object.");
         }
 
-        private void FixedUpdate()
+        internal void executeMove(float horizontalInput)
         {
-            handleMove();
-        }
-
-        private void handleMove()
-        {
-            horizontalMovement *= moveSpeed;
-            rb2d.velocity = new Vector2(horizontalMovement, rb2d.velocity.y);
-        }
-
-        // Unity (new) Input System - Unity Events
-        public void OnMove(InputAction.CallbackContext inputAction)
-        {
-            horizontalMovement = inputAction.ReadValue<Vector2>().x;
+            rb2d.velocity = new Vector2(horizontalInput * moveSpeed, rb2d.velocity.y);
         }
     }
 }

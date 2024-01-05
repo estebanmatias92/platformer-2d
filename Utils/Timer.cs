@@ -7,8 +7,8 @@ namespace Platformer2D.Utils
     {
         public float Duration { get; private set; }
         private float currentTime;
-        public bool IsRunning { get; private set; }
-        public bool IsCompleted => IsRunning && currentTime <= 0;
+        public bool IsActive { get; private set; }
+        public bool IsCompleted => IsActive && currentTime <= 0;
 
         public event Action OnComplete;
 
@@ -23,7 +23,7 @@ namespace Platformer2D.Utils
         /// </summary>
         public void UpdateTimer()
         {
-            if (IsRunning)
+            if (IsActive)
             {
                 currentTime -= Time.deltaTime;
                 if (currentTime <= 0)
@@ -36,19 +36,19 @@ namespace Platformer2D.Utils
 
         public void Start()
         {
-            IsRunning = true;
+            IsActive = true;
             currentTime = Duration;
         }
 
         public void Stop()
         {
-            IsRunning = false;
+            IsActive = false;
         }
 
         public void Reset()
         {
             currentTime = Duration;
-            IsRunning = false;
+            IsActive = false;
         }
     }
 
