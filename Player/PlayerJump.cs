@@ -10,7 +10,6 @@ namespace Platformer2D.Player
         // Customizable fields
         [SerializeField] private float jumpForce = 16f; // Adjust the jump strengh
 
-
         private void Awake()
         {
             rb2d = GetComponent<Rigidbody2D>();

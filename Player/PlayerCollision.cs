@@ -23,7 +23,7 @@ namespace Platformer2D.Player
         public event Action<bool> OnGroundedStateChanged;
 
         // MonoBehaviour event hooks are in sync with the FixedUpdate cycle rate
-        private void OnCollisionEnter2D(Collision2D collision)
+        private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.gameObject.CompareTag("Ground"))
             {
@@ -31,12 +31,11 @@ namespace Platformer2D.Player
             }
         }
 
-        private void OnCollisionExit2D(Collision2D collision)
+        private void OnTriggerExit2D(Collider2D collision)
         {
             if (collision.gameObject.CompareTag("Ground"))
             {
                 IsPlayerGrounded = false;
-
             }
         }
     }
