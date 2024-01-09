@@ -21,6 +21,7 @@ namespace Platformer2D.Player
     public class PlayerController : MonoBehaviour
     {
         // GameObject Components
+        private Rigidbody2D rb2d;
         private PlayerJump playerJump;
         private PlayerMovement playerMovement;
         private PlayerCollision playerCollision;
@@ -28,13 +29,18 @@ namespace Platformer2D.Player
 
         // Editor fields
         [SerializeField] private float jumpBufferTime = 0.2f; // Adjust the buffer time to jump
+        [SerializeField] private float wallJumpCooldown = 1f;
+
 
         // Properties
         private Timer jumpBufferTimer;
+        private Timer wallJumpTimer;
 
         private bool isPlayerGrounded;
         private bool isPlayerRunning; // Maybe it's useless
         private bool isPlayerReadyToJump;
+        private bool isPlayerReadyToWallJump;
+        private bool isPlayerWalled;
 
         private void Awake()
         {
@@ -42,30 +48,34 @@ namespace Platformer2D.Player
             GetPlayerComponents();
 
             jumpBufferTimer = new Timer(jumpBufferTime); // Set JumpBuffer initial state
+            wallJumpTimer = new Timer(wallJumpCooldown);
         }
 
         private void Start()
         {
             isPlayerGrounded = false;
             isPlayerReadyToJump = false;
+            isPlayerReadyToWallJump = false;
         }
 
         private void OnEnable()
         {
             playerCollision.OnGroundedStateChanged += HandleOnGroundStateChange;
+            playerCollision.OnWalledStateChanged += HandleOnWalledStateChange;
             playerMovement.OnMovingStateChanged += HandleOnMovingStateChange;
-
         }
 
         private void OnDisable()
         {
             playerCollision.OnGroundedStateChanged -= HandleOnGroundStateChange;
+            playerCollision.OnWalledStateChanged -= HandleOnWalledStateChange;
             playerMovement.OnMovingStateChanged -= HandleOnMovingStateChange;
-
         }
         private void Update()
         {
             jumpBufferTimer.UpdateTimer(); // Keeps track of the Jump Buffer
+            wallJumpTimer.UpdateTimer();
+
             flipCharacterSprite();
             HandlePlayerAnimation();
         }
@@ -74,6 +84,7 @@ namespace Platformer2D.Player
         {
             HandlePlayerMove();
             HandleJump();
+            handleWallJump();
         }
 
         // Unity (new) Input System - Unity Events
@@ -92,6 +103,8 @@ namespace Platformer2D.Player
             // Set the JUMP READY STATE Or start ticking the jump buffer
             if (isPlayerGrounded) { isPlayerReadyToJump = true; }
             else { jumpBufferTimer.Start(); }
+            // If is on the wall and not grounded, can do wall jumps
+            if (isPlayerWalled && !isPlayerGrounded) { isPlayerReadyToWallJump = true; }
         }
 
         /// <summary>
@@ -99,6 +112,8 @@ namespace Platformer2D.Player
         /// </summary>
         private void GetPlayerComponents()
         {
+            if (!TryGetComponent(out rb2d)) { ShowNullReferenceError(rb2d); }
+
             if (!TryGetComponent(out playerJump)) { ShowNullReferenceError(playerJump); }
             if (!TryGetComponent(out playerMovement)) { ShowNullReferenceError(playerMovement); }
             if (!TryGetComponent(out playerCollision)) { ShowNullReferenceError(playerCollision); }
@@ -116,6 +131,8 @@ namespace Platformer2D.Player
         /// </summary>
         /// <param name="isGrounded">boolean parameter for the event hook</param>
         private void HandleOnGroundStateChange(bool isGrounded) => isPlayerGrounded = isGrounded;
+
+        private void HandleOnWalledStateChange(bool isWalled) => isPlayerWalled = isWalled;
 
         /// <summary>
         /// Use the updates from collison and movement to know if the player is running or idlying.
@@ -147,6 +164,12 @@ namespace Platformer2D.Player
         private void HandlePlayerMove()
         {
             playerMovement.executeMove();
+
+            // Modify this to only stop vertical movement
+            if (isPlayerWalled && !isPlayerGrounded)
+            {
+                rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
+            }
         }
 
         /// <summary>
@@ -169,8 +192,22 @@ namespace Platformer2D.Player
                 playerJump.executeJump(); // Do the trick Bart!!!
 
                 // Reset timer and flag
-                jumpBufferTimer.Stop();
+                jumpBufferTimer.Start();
                 isPlayerReadyToJump = false;
+            }
+        }
+
+        private void handleWallJump()
+        {
+            // Exit if not on the wa
+            if (!isPlayerWalled) { return; }
+
+            // Is able to jump from the wall is there is no cooldown and its sticked to it            
+            if (isPlayerReadyToWallJump && !wallJumpTimer.IsActive)
+            {
+                playerJump.executeWallJump();
+                wallJumpTimer.Start();
+                isPlayerReadyToWallJump = false;
             }
         }
 

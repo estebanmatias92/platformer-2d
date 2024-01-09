@@ -28,7 +28,6 @@ namespace Platformer2D.Player
         /// Takes an Enum and sets animation booleans and floats for blenders
         /// </summary>
         /// <param name="state"></param>
-        /// 
         internal void executeAnimation(States state)
         {
             animator.SetBool("isJumping", state == States.Jumping);
